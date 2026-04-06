@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprende Soldadura | Guía Completa de Técnicas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ===== DESIGN TOKENS ===== */
+        :root {
+            --bg: #0d0d0d;
+            --bg-elevated: #141414;
+            --fg: #f5f5f5;
+            --muted: #888888;
+            --accent: #ff6b2c;
+            --accent-dim: rgba(255,107,44,0.15);
+            --card: #111111;
+            --border: #252525;
+            --spark: #ffcc00;
+            --spark-dim: rgba(255,204,0,0.12);
+            --green: #22c55e;
+            --red: #ef4444;
+
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ===== BASE ===== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            scroll-padding-top: 80px;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--fg);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        img { display: block; max-width: 100%; height: auto; }
+        button { cursor: pointer; background: none; border: none; font: inherit; color: inherit; }
+
+        .font-display { font-family: 'Bebas Neue', sans-serif; }
+
+        /* ===== SKIP LINK ===== */
+        .skip-link {
+            position: absolute;
+            top: -100%;
+            left: 0;
+            padding: 12px 20px;
+            background: var(--accent);
+            color: #000;
+            font-weight: 600;
+            z-index: 9999;
+            transition: top 0.2s;
+        }
+        .skip-link:focus { top: 0; }
+
+        /* ===== CANVAS SPARKS ===== */
+        #sparks-canvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.55;
+        }
+
+        /* ===== NOISE OVERLAY ===== */
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.025;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        }
+
+        /* ===== NAV ===== */
+        .nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: rgba(13,13,13,0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            height: 64px;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 0.05em;
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .nav-logo:hover { color: var(--accent); }
+        .nav-logo span { color: var(--accent); }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-size: 0.875rem;
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.2s;
+            letter-spacing: 0.02em;
+        }
+        .nav-links a:hover { color: #fff; }
+
+        .mobile-menu-btn {
+            display: none;
+            padding: 8px;
+            color: #fff;
+        }
+
+        /* ===== REVEAL ANIMATIONS ===== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(32px);
+            transition: opacity 0.7s var(--ease-out-expo),
+                        transform 0.7s var(--ease-out-expo);
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+        .reveal-delay-1 { transition-delay: 0.08s; }
+        .reveal-delay-2 { transition-delay: 0.16s; }
+        .reveal-delay-3 { transition-delay: 0.24s; }
+        .reveal-delay-4 { transition-delay: 0.32s; }
+        .reveal-delay-5 { transition-delay: 0.40s; }
+        .reveal-delay-6 { transition-delay: 0.48s; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .reveal { opacity: 1; transform: none; transition: none; }
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            position: relative;
+            min-height: 100svh;
+            display: flex;
+            align-items: center;
+            padding-top: 64px;
+            background:
+                radial-gradient(ellipse at 15% 85%, rgba(255,107,44,0.12) 0%, transparent 55%),
+                radial-gradient(ellipse at 85% 15%, rgba(255,204,0,0.07) 0%, transparent 45%),
+                linear-gradient(180deg, var(--bg) 0%, var(--bg-elevated) 100%);
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 2px,
+                rgba(255,255,255,0.008) 2px,
+                rgba(255,255,255,0.008) 4px
+            );
+            pointer-events: none;
+        }
+
+        .hero-image-strip {
+            position: absolute;
+            right: 0;
+            top: 64px;
+            bottom: 0;
+            width: 45%;
+            overflow: hidden;
+            display: none;
+        }
+
+        .hero-image-strip img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.25;
+            filter: grayscale(30%) contrast(1.1);
+        }
+
+        .hero-image-strip::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, var(--bg) 0%, transparent 40%);
+            z-index: 1;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn-primary {
+            display: inline-block;
+            background: var(--accent);
+            color: #000;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 14px 32px;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s var(--ease-out-expo),
+                        box-shadow 0.2s var(--ease-out-expo);
+        }
+
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0);
+            transition: background 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(255,107,44,0.45);
+        }
+        .btn-primary:hover::after { background: rgba(255,255,255,0.1); }
+        .btn-primary:active { transform: translateY(0) scale(0.98); }
+        .btn-primary:focus-visible { outline: 2px solid var(--spark); outline-offset: 3px; }
+
+        .btn-ghost {
+            display: inline-block;
+            padding: 14px 32px;
+            border: 1px solid rgba(255,255,255,0.18);
+            color: #fff;
+            font-size: 0.9rem;
+            text-decoration: none;
+            border-radius: var(--radius-sm);
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .btn-ghost:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.35); }
+
+        /* ===== STATS ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-top: 64px;
+        }
+
+        @media (min-width: 640px) {
+            .stats-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        .stat-number {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            line-height: 1;
+        }
+
+        /* ===== SCROLL INDICATOR ===== */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--muted);
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .scroll-line {
+            width: 1px;
+            height: 48px;
+            background: linear-gradient(to bottom, var(--accent), transparent);
+            animation: scrollPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes scrollPulse {
+            0%, 100% { opacity: 0.4; transform: scaleY(0.8); }
+            50% { opacity: 1; transform: scaleY(1); }
+        }
+
+        /* ===== SECTION LABEL ===== */
+        .section-label {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--accent);
+            border: 1px solid rgba(255,107,44,0.3);
+            padding: 4px 12px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
+        }
+
+        /* ===== WELD CARDS ===== */
+        .weld-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            transition: transform 0.35s var(--ease-out-expo),
+                        border-color 0.35s var(--ease-out-expo),
+                        box-shadow 0.35s var(--ease-out-expo);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .weld-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--spark));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s var(--ease-out-expo);
+        }
+
+        .weld-card:hover::before { transform: scaleX(1); }
+        .weld-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(255,107,44,0.4);
+            box-shadow: 0 16px 48px rgba(255,107,44,0.1);
+        }
+
+        .weld-card:focus-within {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .card-image-wrap {
+            aspect-ratio: 16/9;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-image-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s var(--ease-out-expo), filter 0.5s;
+            filter: grayscale(20%);
+        }
+
+        .weld-card:hover .card-image-wrap img {
+            transform: scale(1.06);
+            filter: grayscale(0%);
+        }
+
+        .card-image-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent 40%, var(--card) 100%);
+        }
+
+        /* ===== BADGES ===== */
+        .badge {
+            padding: 3px 10px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            border-radius: var(--radius-sm);
+        }
+        .badge-beginner { background: rgba(34,197,94,0.12); color: var(--green); border: 1px solid rgba(34,197,94,0.25); }
+        .badge-intermediate { background: rgba(255,204,0,0.12); color: var(--spark); border: 1px solid rgba(255,204,0,0.25); }
+        .badge-advanced { background: rgba(255,107,44,0.12); color: var(--accent); border: 1px solid rgba(255,107,44,0.25); }
+
+        /* ===== GALLERY SECTION ===== */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: auto;
+            gap: 8px;
+        }
+
+        @media (min-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: repeat(4, 1fr);
+                grid-template-rows: repeat(2, 200px);
+            }
+            .gallery-item:first-child {
+                grid-column: span 2;
+                grid-row: span 2;
+            }
+        }
+
+        .gallery-item {
+            overflow: hidden;
+            border-radius: var(--radius-md);
+            position: relative;
+            background: var(--card);
+            aspect-ratio: 4/3;
+        }
+
+        @media (min-width: 768px) {
+            .gallery-item { aspect-ratio: unset; }
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s var(--ease-out-expo), filter 0.4s;
+            filter: grayscale(15%) brightness(0.85);
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.08);
+            filter: grayscale(0%) brightness(1);
+        }
+
+        .gallery-item-label {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            padding: 12px 16px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.75));
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.9);
+            transform: translateY(4px);
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .gallery-item:hover .gallery-item-label {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== TABS ===== */
+        .tab-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            padding: 10px 22px;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 0.875rem;
+            border-radius: var(--radius-sm);
+            transition: color 0.2s, border-color 0.2s, background 0.2s;
+        }
+        .tab-btn:hover { color: var(--fg); border-color: rgba(255,255,255,0.25); }
+        .tab-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+        .tab-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+        /* ===== TABLE ===== */
+        .comparison-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .comparison-table th {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1rem;
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            color: rgba(255,255,255,0.6);
+        }
+        .comparison-table td {
+            padding: 16px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .comparison-table tbody tr {
+            transition: background 0.15s;
+        }
+        .comparison-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+
+        /* ===== QUIZ ===== */
+        .quiz-container {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+        }
+
+        .progress-track {
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--spark));
+            border-radius: 2px;
+            transition: width 0.4s var(--ease-out-expo);
+        }
+
+        .quiz-option {
+            width: 100%;
+            text-align: left;
+            padding: 14px 18px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            color: var(--fg);
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .quiz-option:hover { border-color: var(--accent); background: var(--accent-dim); }
+        .quiz-option.correct { border-color: var(--green); background: rgba(34,197,94,0.1); }
+        .quiz-option.incorrect { border-color: var(--red); background: rgba(239,68,68,0.1); }
+        .quiz-option.selected { border-color: var(--accent); }
+        .quiz-option:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .quiz-option:disabled { cursor: not-allowed; }
+
+        .quiz-letter {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1rem;
+            color: var(--accent);
+            margin-right: 10px;
+        }
+
+        .quiz-feedback {
+            padding: 14px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.03);
+            font-size: 0.88rem;
+            line-height: 1.55;
+        }
+
+        .btn-nav {
+            padding: 10px 24px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--muted);
+            font-size: 0.875rem;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .btn-nav:hover:not(:disabled) { color: var(--fg); border-color: rgba(255,255,255,0.3); }
+        .btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+        .btn-nav:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+        /* ===== SAFETY CARDS ===== */
+        .safety-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 28px 20px;
+            text-align: center;
+            transition: border-color 0.3s, transform 0.3s var(--ease-out-expo);
+        }
+        .safety-card:hover { border-color: rgba(255,107,44,0.35); transform: translateY(-4px); }
+
+        .safety-icon {
+            width: 52px;
+            height: 52px;
+            margin: 0 auto 16px;
+            color: var(--accent);
+        }
+
+        /* ===== HERO TECH IMAGE (right side) ===== */
+        @media (min-width: 1024px) {
+            .hero-image-strip { display: block; }
+        }
+
+        /* ===== FEATURE IMAGE ROW ===== */
+        .feature-image-row {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: 1fr 1fr;
+        }
+        @media (min-width: 768px) {
+            .feature-image-row { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        .feature-img {
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            aspect-ratio: 4/3;
+            position: relative;
+        }
+        .feature-img img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            filter: grayscale(20%);
+            transition: transform 0.4s var(--ease-out-expo), filter 0.4s;
+        }
+        .feature-img:hover img { transform: scale(1.05); filter: grayscale(0%); }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+        /* ===== SELECTION ===== */
+        ::selection { background: rgba(255,107,44,0.3); color: #fff; }
+
+        /* ===== FOCUS ===== */
+        :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+
+        /* ===== RESPONSIVE NAV ===== */
+        @media (max-width: 767px) {
+            .nav-links { display: none; }
+            .mobile-menu-btn { display: block; }
+            .nav-links.open {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 64px;
+                left: 0; right: 0;
+                background: rgba(13,13,13,0.98);
+                border-bottom: 1px solid var(--border);
+                padding: 20px 24px;
+                gap: 20px;
+            }
+        }
+
+        /* ===== DIVIDER LINE ===== */
+        .accent-divider {
+            width: 48px;
+            height: 2px;
+            background: var(--accent);
+            margin: 16px 0;
+        }
+
+        /* ===== RESULTS ===== */
+        .results-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 48px 32px;
+            text-align: center;
+        }
+
+        .results-score {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 5rem;
+            color: var(--accent);
+            line-height: 1;
+        }
+
+    </style>
+</head>
+<body>
+
+    <a href="#main" class="skip-link">Saltar al contenido</a>
+    <canvas id="sparks-canvas" aria-hidden="true"></canvas>
+    <div class="noise-overlay" aria-hidden="true"></div>
+
+    <!-- ===== NAV ===== -->
+    <nav class="nav" role="navigation" aria-label="Navegación principal">
+        <div class="nav-inner">
+            <a href="#" class="nav-logo" aria-label="WeldMaster inicio">
+                WELD<span>MASTER</span>
+            </a>
+            <ul class="nav-links" id="nav-links" role="list">
+                <li><a href="#tipos">Tipos</a></li>
+                <li><a href="#galeria">Galería</a></li>
+                <li><a href="#comparacion">Comparativa</a></li>
+                <li><a href="#quiz">Quiz</a></li>
+                <li><a href="#seguridad">Seguridad</a></li>
+            </ul>
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav-links">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero" id="main">
+        <div class="hero-image-strip" aria-hidden="true">
+            <img
+                src="https://pplx-res.cloudinary.com/image/upload/pplx_search_images/ec63afcac94dfdf18bd76c6dd5658aa6d6f71365.jpg"
+                alt=""
+                width="900"
+                height="800"
+                loading="eager"
+            >
+        </div>
+
+        <div style="max-width:1200px; margin:0 auto; padding:0 24px; width:100%; position:relative; z-index:2; padding-top:80px; padding-bottom:80px;">
+            <div style="max-width:600px;">
+                <div class="reveal">
+                    <span class="section-label">Aprende desde cero</span>
+                </div>
+                <h1 class="font-display reveal reveal-delay-1" style="font-size:clamp(3rem,9vw,6rem); line-height:0.95; margin-bottom:24px; letter-spacing:0.02em;">
+                    DOMINA EL ARTE DE LA<br>
+                    <span style="color:var(--accent);">SOLDADURA</span>
+                </h1>
+                <div class="accent-divider reveal reveal-delay-2"></div>
+                <p class="reveal reveal-delay-2" style="font-size:1.05rem; color:var(--muted); max-width:480px; margin-bottom:36px; line-height:1.7;">
+                    Guía completa sobre técnicas de soldadura moderna. Desde los fundamentos hasta métodos avanzados de fusión de metales.
+                </p>
+                <div style="display:flex; flex-wrap:wrap; gap:12px;" class="reveal reveal-delay-3">
+                    <a href="#tipos" class="btn-primary">Explorar Técnicas</a>
+                    <a href="#quiz" class="btn-ghost">Hacer el Quiz →</a>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid reveal reveal-delay-4">
+                <div>
+                    <div class="stat-number" style="color:var(--accent);">6</div>
+                    <div style="font-size:0.8rem; color:var(--muted); margin-top:4px;">Técnicas principales</div>
+                </div>
+                <div>
+                    <div class="stat-number" style="color:var(--spark);">50+</div>
+                    <div style="font-size:0.8rem; color:var(--muted); margin-top:4px;">Consejos prácticos</div>
+                </div>
+                <div>
+                    <div class="stat-number" style="color:#fff;">12</div>
+                    <div style="font-size:0.8rem; color:var(--muted); margin-top:4px;">Preguntas quiz</div>
+                </div>
+                <div>
+                    <div class="stat-number" style="color:var(--accent);">100%</div>
+                    <div style="font-size:0.8rem; color:var(--muted); margin-top:4px;">Práctico y seguro</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="scroll-indicator" aria-hidden="true">
+            <span>Scroll</span>
+            <div class="scroll-line"></div>
+        </div>
+    </header>
+
+    <!-- ===== WELDING TYPES ===== -->
+    <section id="tipos" style="padding:96px 0; background:var(--bg-elevated); position:relative;">
+        <div style="max-width:1200px; margin:0 auto; padding:0 24px;">
+            <div style="text-align:center; margin-bottom:56px;">
+                <div class="reveal"><span class="section-label">Técnicas</span></div>
+                <h2 class="font-display reveal reveal-delay-1" style="font-size:clamp(2.2rem,5vw,4rem); margin-bottom:16px;">TIPOS DE SOLDADURA</h2>
+                <p class="reveal reveal-delay-2" style="color:var(--muted); max-width:480px; margin:0 auto; font-size:0.95rem;">
+                    Las principales técnicas de soldadura utilizadas en la industria moderna
+                </p>
+            </div>
+            <div id="welding-types" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(min(340px,100%),1fr)); gap:20px;"></div>
+        </div>
+    </section>
+
+    <!-- ===== GALLERY ===== -->
+    <section id="galeria" style="padding:96px 0; background:var(--bg);">
+        <div style="max-width:1200px; margin:0 auto; padding:0 24px;">
+            <div style="text-align:center; margin-bottom:48px;">
+                <div class="reveal"><span class="section-label">En Acción</span></div>
+                <h2 class="font-display reveal reveal-delay-1" style="font-size:clamp(2.2rem,5vw,4rem); margin-bottom:16px;">GALERÍA</h2>
+                <p class="reveal reveal-delay-2" style="color:var(--muted); max-width:420px; margin:0 auto; font-size:0.95rem;">
+                    Imágenes de técnicas y equipamiento de soldadura profesional
+                </p>
+            </div>
+            <div class="gallery-grid reveal">
+                <div class="gallery-item">
+                    <img src="https://pplx-res.cloudinary.com/image/upload/pplx_search_images/ec63afcac94dfdf18bd76c6dd5658aa6d6f71365.jpg" alt="Soldador con máscara, guantes y protección completa" width="800" height="600" loading="lazy">
+                    <div class="gallery-item-label">Protección Completa</div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://pplx-res.cloudinary.com/image/upload/pplx_search_images/ff03b882d33af24aeb7927f39219797efd369f8a.jpg" alt="Proceso MIG claramente visible" width="400" height="300" loading="lazy">
+                    <div class="gallery-item-label">Proceso MIG</div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://pplx-res.cloudinary.com/image/upload/pplx_search_images/11c4181bbdadb87d8b96097fe3380c276b02c73e.jpg" alt="Proceso de arco manual con electrodo" width="400" height="300" loading="lazy">
+                    <div class="gallery-item-label">Arco Manual</div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://pplx-res.cloudinary.com/image/upload/pplx_search_images/3578bccd2b2d58e1a4cf1b92076d6123f46107b3.jpg" alt="Soldadura oxiacetilénica con llama" width="400" height="300" loading="lazy">
+                    <div class="gallery-item-label">Oxiacetilénica</div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Plasma_Welding_Torch.svg/1280px-Plasma_Welding_Torch.svg.png" alt="Proceso de plasma con componentes identificados" width="400" height="300" loading="lazy">
+                    <div class="gallery-item-label">Plasma</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== COMPARISON ===== -->
+    <section id="comparacion" style="padding:96px 0; background:var(--bg-elevated);">
+        <div style="max-width:1200px; margin:0 auto; padding:0 24px;">
+            <div style="text-align:center; margin-bottom:48px;">
+                <div class="reveal"><span class="section-label">Análisis</span></div>
+                <h2 class="font-display reveal reveal-delay-1" style="font-size:clamp(2.2rem,5vw,4rem); margin-bottom:16px;">COMPARATIVA RÁPIDA</h2>
+                <p class="reveal reveal-delay-2" style="color:var(--muted); max-width:420px; margin:0 auto; font-size:0.95rem;">
+                    Encuentra la técnica adecuada para tu proyecto
+                </p>
+            </div>
+            <div class="tab-list reveal reveal-delay-2" role="tablist" style="margin-bottom:36px;">
+                <button class="tab-btn active" role="tab" data-tab="usos" aria-selected="true">Por Uso</button>
+                <button class="tab-btn" role="tab" data-tab="materiales" aria-selected="false">Por Material</button>
+                <button class="tab-btn" role="tab" data-tab="dificultad" aria-selected="false">Por Dificultad</button>
+            </div>
+            <div class="reveal reveal-delay-3" style="overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius-md);">
+                <table class="comparison-table" id="comparison-table" aria-label="Comparativa de técnicas">
+                    <thead>
+                        <tr>
+                            <th>Técnica</th>
+                            <th id="col2-header">Mejor Para</th>
+                            <th id="col3-header">Velocidad</th>
+                        </tr>
+                    </thead>
+                    <tbody id="comparison-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== QUIZ ===== -->
+    <section id="quiz" style="padding:96px 0; background:var(--bg);">
+        <div style="max-width:700px; margin:0 auto; padding:0 24px;">
+            <div style="text-align:center; margin-bottom:48px;">
+                <div class="reveal"><span class="section-label">Test de Conocimiento</span></div>
+                <h2 class="font-display reveal reveal-delay-1" style="font-size:clamp(2.2rem,5vw,4rem); margin-bottom:16px;">PONTE A PRUEBA</h2>
+                <p class="reveal reveal-delay-2" style="color:var(--muted); font-size:0.95rem;">
+                    Evalúa tus conocimientos con este quiz interactivo
+                </p>
+            </div>
+
+            <div id="quiz-container" class="quiz-container reveal reveal-delay-2">
+                <div style="margin-bottom:24px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <span style="font-size:0.8rem; color:var(--muted);">Progreso</span>
+                        <span id="quiz-progress-text" style="font-size:0.8rem; color:var(--accent); font-weight:600;">1 / 12</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="quiz-progress-bar" style="width:8.33%"></div>
+                    </div>
+                </div>
+
+                <h3 id="quiz-question" class="font-display" style="font-size:clamp(1.5rem,4vw,2rem); margin-bottom:20px; line-height:1.2;"></h3>
+                <div id="quiz-options" style="display:flex; flex-direction:column; gap:10px;" role="radiogroup" aria-label="Opciones de respuesta"></div>
+                <div id="quiz-feedback" class="quiz-feedback" style="margin-top:16px; display:none;"></div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:24px; padding-top:20px; border-top:1px solid var(--border);">
+                    <button id="quiz-prev" class="btn-nav" disabled>← Anterior</button>
+                    <button id="quiz-next" class="btn-primary" style="padding:10px 28px;">Siguiente →</button>
+                </div>
+            </div>
+
+            <div id="quiz-results" class="results-box reveal" style="display:none;">
+                <div class="results-score" id="score-display">0/12</div>
+                <p style="font-size:1.1rem; margin:16px 0 24px; color:var(--fg);" id="score-message"></p>
+                <button id="quiz-restart" class="btn-primary">Intentar de Nuevo</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SAFETY ===== -->
+    <section id="seguridad" style="padding:96px 0; background:var(--bg-elevated);">
+        <div style="max-width:1200px; margin:0 auto; padding:0 24px;">
+            <div style="text-align:center; margin-bottom:56px;">
+                <div class="reveal"><span class="section-label">Protección</span></div>
+                <h2 class="font-display reveal reveal-delay-1" style="font-size:clamp(2.2rem,5vw,4rem); margin-bottom:16px;">SEGURIDAD ANTE TODO</h2>
+                <p class="reveal reveal-delay-2" style="color:var(--muted); max-width:400px; margin:0 auto; font-size:0.95rem;">
+                    Equipamiento esencial para proteger tu vida durante el trabajo
+                </p>
+            </div>
+
+            <!-- Safety hero image -->
+            <div class="reveal" style="border-radius:var(--radius-lg); overflow:hidden; margin-bottom:40px; max-height:320px;">
+                <img
+                    src="https://pplx-res.cloudinary.com/image/upload/pplx_search_images/6432f826a39f657c5d7f2edb76f3856256ee34c3.jpg"
+                    alt="Soldador con equipo de protección completo"
+                    width="1200"
+                    height="400"
+                    loading="lazy"
+                    style="width:100%; height:320px; object-fit:cover; filter:grayscale(20%) brightness(0.7);"
+                >
+            </div>
+
+            <div id="safety-grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(min(220px,100%),1fr)); gap:16px;"></div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer style="background:#000; border-top:1px solid var(--border); padding:48px 24px;">
+        <div style="max-width:1200px; margin:0 auto; display:flex; flex-direction:column; align-items:center; gap:16px; text-align:center;">
+            <a href="#" class="nav-logo" style="font-size:1.8rem;">WELD<span>MASTER</span></a>
+            <p style="color:var(--muted); font-size:0.85rem;">Aprende soldadura de forma segura y profesional</p>
+            <nav style="display:flex; gap:24px; flex-wrap:wrap; justify-content:center;" aria-label="Navegación pie de página">
+                <a href="#tipos" style="color:var(--muted); font-size:0.85rem; text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--muted)'">Tipos</a>
+                <a href="#galeria" style="color:var(--muted); font-size:0.85rem; text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--muted)'">Galería</a>
+                <a href="#quiz" style="color:var(--muted); font-size:0.85rem; text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--muted)'">Quiz</a>
+                <a href="#seguridad" style="color:var(--muted); font-size:0.85rem; text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--muted)'">Seguridad</a>
+            </nav>
+            <p style="color:rgba(255,255,255,0.15); font-size:0.75rem; margin-top:8px;">© 2026 WeldMaster · Todos los derechos reservados</p>
+        </div>
+    </footer>
+
+    <script>
+    'use strict';
+
+    // ===== DATA =====
+    const WELDING_TYPES = [
+        {
+            id: 'mig',
+            name: 'Soldadura MIG/MAG',
+            subtitle: 'Gas Metal Arc Welding',
+            description: 'Utiliza un electrodo de alambre continuo y un gas protector. Ideal para trabajos de producción rápida y metales delgados.',
+            uses: 'Automotriz, fabricación metálica, estructuras ligeras',
+            difficulty: 'beginner',
+            materials: 'Acero, aluminio, acero inoxidable',
+            speed: 'Alta',
+            imgSeed: 'mig-welding',
+        },
+        {
+            id: 'tig',
+            name: 'Soldadura TIG',
+            subtitle: 'Gas Tungsten Arc Welding',
+            description: 'Emplea un electrodo de tungsteno no consumible. Produce soldaduras de alta calidad y precisión excepcional.',
+            uses: 'Aeroespacial, tuberías de presión, trabajos artísticos',
+            difficulty: 'advanced',
+            materials: 'Todos los metales conductores',
+            speed: 'Lenta',
+            imgSeed: 'tig-welding',
+        },
+        {
+            id: 'electrodo',
+            name: 'Electrodo Revestido',
+            subtitle: 'Shielded Metal Arc Welding',
+            description: 'Método clásico usando electrodos recubiertos. Versátil y económico, funciona en condiciones adversas.',
+            uses: 'Construcción, reparaciones en campo, estructuras pesadas',
+            difficulty: 'intermediate',
+            materials: 'Acero al carbono, acero aleado',
+            speed: 'Media',
+            imgSeed: 'smaw-welding',
+        },
+        {
+            id: 'puntos',
+            name: 'Soldadura por Puntos',
+            subtitle: 'Resistance Spot Welding',
+            description: 'Une metales mediante calor y presión eléctrica. Rápida y eficiente para uniones localizadas.',
+            uses: 'Industria automotriz, electrodomésticos, chapas',
+            difficulty: 'beginner',
+            materials: 'Láminas de acero, acero galvanizado',
+            speed: 'Muy alta',
+            imgSeed: 'spot-welding',
+        },
+        {
+            id: 'oxiacetilenica',
+            name: 'Oxiacetilénica',
+            subtitle: 'Oxy-Fuel Welding',
+            description: 'Usa llama de oxígeno y acetileno. Método tradicional ideal para trabajos con cobre y latón.',
+            uses: 'Plomería, trabajos artísticos, reparaciones',
+            difficulty: 'intermediate',
+            materials: 'Cobre, latón, acero delgado',
+            speed: 'Media',
+            imgSeed: 'oxyfuel-welding',
+        },
+        {
+            id: 'plasma',
+            name: 'Arco Plasma',
+            subtitle: 'Plasma Arc Welding',
+            description: 'Ioniza gas para crear arco plasma de alta temperatura. Precisión extrema para aplicaciones exigentes.',
+            uses: 'Aeroespacial, instrumentos médicos, micro-soldadura',
+            difficulty: 'advanced',
+            materials: 'Titanio, níquel, aceros especiales',
+            speed: 'Media',
+            imgSeed: 'plasma-welding',
+        },
+    ];
+
+    const QUIZ_QUESTIONS = [
+        { question: '¿Qué tipo de soldadura es mejor para un principiante?', options: ['TIG', 'MIG/MAG', 'Plasma', 'Electrodo revestido'], correct: 1, explanation: 'MIG/MAG es la más fácil de aprender por su electrodo continuo y fácil control.' },
+        { question: '¿Cuál soldadura produce los cordones más estéticos?', options: ['Por puntos', 'Electrodo', 'TIG', 'Oxiacetilénica'], correct: 2, explanation: 'TIG ofrece la mayor precisión y control, produciendo soldaduras visualmente impecables.' },
+        { question: '¿Qué gas se usa comúnmente en soldadura MIG para acero?', options: ['Oxígeno puro', 'Argón + CO₂', 'Nitrógeno', 'Hidrógeno'], correct: 1, explanation: 'La mezcla de Argón y CO₂ proporciona estabilidad del arco y buena penetración.' },
+        { question: '¿Cuál método es ideal para soldar tuberías en campo?', options: ['MIG', 'Por puntos', 'Electrodo revestido', 'Plasma'], correct: 2, explanation: 'El electrodo revestido funciona al aire libre sin gas protector externo.' },
+        { question: '¿Qué protege al electrodo en soldadura TIG?', options: ['Revestimiento sólido', 'Gas inerte', 'Flux líquido', 'Vacío'], correct: 1, explanation: 'El gas inerte (Argón o Helio) protege el área de soldadura de contaminación.' },
+        { question: '¿Cuál es la temperatura aproximada del arco de plasma?', options: ['2,000°C', '10,000°C', '20,000°C', '50,000°C'], correct: 2, explanation: 'El arco plasma alcanza aproximadamente 20,000°C, suficiente para cortar cualquier metal.' },
+        { question: '¿Qué soldadura no requiere gas protector externo?', options: ['MIG', 'TIG', 'Electrodo revestido', 'Plasma'], correct: 2, explanation: 'El revestimiento del electrodo genera gases protectores durante la combustión.' },
+        { question: '¿Cuál técnica es más rápida para producción en serie?', options: ['TIG', 'Por puntos', 'Oxiacetilénica', 'Electrodo'], correct: 1, explanation: 'La soldadura por puntos es extremadamente rápida, ideal para líneas de producción.' },
+        { question: '¿Qué material es difícil de soldar con electrodo simple?', options: ['Acero al carbono', 'Aluminio', 'Hierro fundido', 'Acero inoxidable'], correct: 1, explanation: 'El aluminio requiere electrodos especiales y técnica TIG para mejores resultados.' },
+        { question: '¿Cuál es el EPP más importante en soldadura?', options: ['Guantes', 'Máscara de soldar', 'Delantal', 'Todas son críticas'], correct: 3, explanation: 'Todo el equipo de protección es esencial. Ninguna pieza es opcional.' },
+        { question: '¿Qué produce la radiación UV en soldadura?', options: ['Quemaduras en piel', 'Daños oculares', 'Ambas respuestas', 'Ninguna'], correct: 2, explanation: 'La radiación UV causa quemaduras en piel expuesta y daños serios en ojos sin protección.' },
+        { question: '¿Cuál soldadura usa electrodo de tungsteno?', options: ['MIG', 'TIG', 'Electrodo', 'Por puntos'], correct: 1, explanation: 'TIG usa tungsteno como electrodo no consumible para mantener el arco eléctrico.' },
+    ];
+
+    const COMPARISON_DATA = {
+        usos: {
+            headers: ['Técnica', 'Mejor Para', 'Velocidad'],
+            rows: [
+                ['MIG/MAG', 'Fabricación general, automotriz', 'Alta'],
+                ['TIG', 'Precisión, industria aeroespacial', 'Lenta'],
+                ['Electrodo', 'Construcción, reparaciones', 'Media'],
+                ['Puntos', 'Chapas, industria automotriz', 'Muy alta'],
+                ['Oxiacetilénica', 'Plomería, trabajos artísticos', 'Media'],
+                ['Plasma', 'Alta precisión, metales exóticos', 'Media'],
+            ],
+        },
+        materiales: {
+            headers: ['Técnica', 'Materiales', 'Versatilidad'],
+            rows: [
+                ['MIG/MAG', 'Acero, aluminio, inoxidable', 'Versátil'],
+                ['TIG', 'Todos los metales conductores', 'Muy versátil'],
+                ['Electrodo', 'Acero al carbono y aleado', 'Limitado'],
+                ['Puntos', 'Láminas de acero', 'Limitado'],
+                ['Oxiacetilénica', 'Cobre, latón, acero fino', 'Moderado'],
+                ['Plasma', 'Titanio, níquel, especiales', 'Especializado'],
+            ],
+        },
+        dificultad: {
+            headers: ['Técnica', 'Nivel', 'Tiempo para dominar'],
+            rows: [
+                ['MIG/MAG', 'Principiante', '1–2 semanas'],
+                ['TIG', 'Avanzado', '6+ meses'],
+                ['Electrodo', 'Intermedio', '2–4 semanas'],
+                ['Puntos', 'Principiante', '1 semana'],
+                ['Oxiacetilénica', 'Intermedio', '2–4 semanas'],
+                ['Plasma', 'Avanzado', '4+ meses'],
+            ],
+        },
+    };
+
+    const SAFETY_ITEMS = [
+        {
+            icon: 'mask',
+            title: 'Máscara de Soldar',
+            desc: 'Protege ojos y cara de radiación UV, chispas y salpicaduras.',
+            color: 'var(--accent)',
+        },
+        {
+            icon: 'gloves',
+            title: 'Guantes de Cuero',
+            desc: 'Aislamiento térmico y protección contra cortes y quemaduras.',
+            color: 'var(--spark)',
+        },
+        {
+            icon: 'apron',
+            title: 'Delantal y Mangas',
+            desc: 'Protección corporal contra salpicaduras de metal fundido.',
+            color: 'var(--green)',
+        },
+        {
+            icon: 'boots',
+            title: 'Calzado de Seguridad',
+            desc: 'Botas con punta de acero y suela aislante contra corrientes.',
+            color: '#60a5fa',
+        },
+    ];
+
+    const SAFETY_ICONS = {
+        mask: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M12 3C7 3 3 5 3 8v8c0 3 4 5 9 5s9-2 9-5V8c0-3-4-5-9-5z"/>
+            <path d="M9 12h6M9 16h6"/>
+            <circle cx="7" cy="10" r="1.5"/>
+            <circle cx="17" cy="10" r="1.5"/>
+        </svg>`,
+        gloves: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M6 11V6a2 2 0 114 0v5M10 11V4a2 2 0 114 0v7M14 11V6a2 2 0 114 0v9a6 6 0 01-6 6H8a4 4 0 01-4-4v-6a2 2 0 114 0"/>
+        </svg>`,
+        apron: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M8 3h8v4a4 4 0 01-4 4 4 4 0 01-4-4V3z"/>
+            <path d="M6 7h12v13a1 1 0 01-1 1H7a1 1 0 01-1-1V7z"/>
+            <path d="M10 14h4M10 17h4"/>
+        </svg>`,
+        boots: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M7 21h10v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4z"/>
+            <path d="M9 15V9a3 3 0 116 0v6"/>
+            <path d="M5 21h14"/>
+        </svg>`,
+    };
+
+    // ===== STATE =====
+    let quizState = {
+        current: 0,
+        score: 0,
+        answered: false,
+    };
+
+    let currentTab = 'usos';
+
+    // ===== DOM HELPERS =====
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => document.querySelectorAll(sel);
+    const create = (tag, attrs = {}, ...children) => {
+        const el = document.createElement(tag);
+        Object.entries(attrs).forEach(([k, v]) => {
+            if (k === 'class') el.className = v;
+            else if (k === 'html') el.innerHTML = v;
+            else if (k === 'text') el.textContent = v;
+            else el.setAttribute(k, v);
+        });
+        children.forEach(c => c && el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c));
+        return el;
+    };
+
+    // ===== DIFFICULTY LABEL =====
+    const diffLabel = (d) => ({ beginner: 'Principiante', intermediate: 'Intermedio', advanced: 'Avanzado' }[d] ?? d);
+
+    // ===== RENDER: WELDING TYPES =====
+    function renderWeldingTypes() {
+        const container = $('#welding-types');
+        if (!container) return;
+
+        const fragment = document.createDocumentFragment();
+
+        const techniqueImages = {
+            mig: {
+                src: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/ff03b882d33af24aeb7927f39219797efd369f8a.jpg',
+                alt: 'Proceso de soldadura MIG claramente visible con pistola y chispas'
+            },
+            tig: {
+                src: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/73b3eafc64e3aec2a415fdbf2bca7e20ac4a611a.jpg',
+                alt: 'Proceso de soldadura TIG con tungsteno, gas y baño de fusión'
+            },
+            electrodo: {
+                src: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/11c4181bbdadb87d8b96097fe3380c276b02c73e.jpg',
+                alt: 'Soldadura por arco manual con electrodo revestido y chispas'
+            },
+            puntos: {
+                src: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/e772eb52fc4bac3c78c5f8e2429004684e84334f.jpg',
+                alt: 'Proceso de soldadura por puntos en máquina industrial'
+            },
+            oxiacetilenica: {
+                src: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/3578bccd2b2d58e1a4cf1b92076d6123f46107b3.jpg',
+                alt: 'Proceso de soldadura oxiacetilénica con llama visible'
+            },
+            plasma: {
+                src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Plasma_Welding_Torch.svg/1280px-Plasma_Welding_Torch.svg.png',
+                alt: 'Proceso de soldadura por plasma con componentes claramente identificados'
+            }
+        };
+
+        WELDING_TYPES.forEach((type, index) => {
+            const delayClass = `reveal-delay-${Math.min(index + 1, 6)}`;
+            const article = create('article', {
+                class: `weld-card reveal ${delayClass}`,
+                tabindex: '0',
+                'aria-label': type.name,
+            });
+
+            const image = techniqueImages[type.id] || {
+                src: 'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=800&q=80&v=gallery2',
+                alt: `${type.name} en acción`
+            };
+
+            article.innerHTML = `
+                <div class="card-image-wrap">
+                    <img
+                        src="${image.src}"
+                        alt="${image.alt}"
+                        width="600"
+                        height="338"
+                        loading="lazy"
+                    >
+                    <div class="card-image-overlay"></div>
+                </div>
+                <div style="padding:20px 20px 24px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                        <span class="badge badge-${type.difficulty}">${diffLabel(type.difficulty)}</span>
+                        <span class="font-display" style="color:var(--accent); font-size:2rem; line-height:1;">${String(index + 1).padStart(2, '0')}</span>
+                    </div>
+                    <h3 class="font-display" style="font-size:1.6rem; margin-bottom:4px; line-height:1.1;">${type.name}</h3>
+                    <p style="font-size:0.72rem; color:var(--muted); margin-bottom:12px; letter-spacing:0.04em; text-transform:uppercase;">${type.subtitle}</p>
+                    <p style="font-size:0.88rem; color:var(--muted); line-height:1.65; margin-bottom:16px;">${type.description}</p>
+                    <div style="padding-top:14px; border-top:1px solid var(--border);">
+                        <p style="font-size:0.7rem; color:var(--accent); font-weight:600; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px;">Aplicaciones</p>
+                        <p style="font-size:0.83rem; color:var(--muted);">${type.uses}</p>
+                    </div>
+                </div>
+            `;
+
+            fragment.appendChild(article);
+        });
+
+        container.appendChild(fragment);
+    }
+
+    // ===== RENDER: COMPARISON TABLE =====
+    function renderComparisonTable(tabKey) {
+        const body = $('#comparison-body');
+        const col2 = $('#col2-header');
+        const col3 = $('#col3-header');
+        const data = COMPARISON_DATA[tabKey];
+        if (!body || !data) return;
+
+        if (col2) col2.textContent = data.headers[1];
+        if (col3) col3.textContent = data.headers[2];
+
+        const fragment = document.createDocumentFragment();
+        data.rows.forEach(([technique, col2val, col3val]) => {
+            const tr = create('tr');
+            tr.innerHTML = `
+                <td style="font-weight:500;">${technique}</td>
+                <td style="color:var(--muted);">${col2val}</td>
+                <td><span style="color:var(--accent);">${col3val}</span></td>
+            `;
+            fragment.appendChild(tr);
+        });
+
+        body.innerHTML = '';
+        body.appendChild(fragment);
+    }
+
+    // ===== RENDER: SAFETY =====
+    function renderSafetyItems() {
+        const container = $('#safety-grid');
+        if (!container) return;
+
+        const fragment = document.createDocumentFragment();
+        SAFETY_ITEMS.forEach((item, i) => {
+            const card = create('div', {
+                class: `safety-card reveal reveal-delay-${i + 1}`,
+            });
+            card.innerHTML = `
+                <div class="safety-icon" style="color:${item.color};">${SAFETY_ICONS[item.icon]}</div>
+                <h3 class="font-display" style="font-size:1.3rem; margin-bottom:8px;">${item.title}</h3>
+                <p style="font-size:0.85rem; color:var(--muted); line-height:1.6;">${item.desc}</p>
+            `;
+            fragment.appendChild(card);
+        });
+
+        container.appendChild(fragment);
+    }
+
+    // ===== QUIZ =====
+    function renderQuestion() {
+        const q = QUIZ_QUESTIONS[quizState.current];
+        const questionEl = $('#quiz-question');
+        const optionsEl = $('#quiz-options');
+        const feedbackEl = $('#quiz-feedback');
+        const progressText = $('#quiz-progress-text');
+        const progressBar = $('#quiz-progress-bar');
+        const prevBtn = $('#quiz-prev');
+        const nextBtn = $('#quiz-next');
+
+        if (!q || !questionEl || !optionsEl) return;
+
+        questionEl.textContent = q.question;
+        progressText.textContent = `${quizState.current + 1} / ${QUIZ_QUESTIONS.length}`;
+        progressBar.style.width = `${((quizState.current + 1) / QUIZ_QUESTIONS.length) * 100}%`;
+
+        feedbackEl.style.display = 'none';
+        quizState.answered = false;
+
+        if (prevBtn) prevBtn.disabled = quizState.current === 0;
+        if (nextBtn) {
+            nextBtn.textContent = quizState.current === QUIZ_QUESTIONS.length - 1 ? 'Ver Resultado →' : 'Siguiente →';
+        }
+
+        const fragment = document.createDocumentFragment();
+        q.options.forEach((opt, i) => {
+            const btn = create('button', {
+                class: 'quiz-option',
+                role: 'radio',
+                'aria-checked': 'false',
+                'data-index': String(i),
+            });
+            btn.innerHTML = `<span class="quiz-letter">${String.fromCharCode(65 + i)}</span>${opt}`;
+            btn.addEventListener('click', () => handleAnswer(btn));
+            fragment.appendChild(btn);
+        });
+
+        optionsEl.innerHTML = '';
+        optionsEl.appendChild(fragment);
+    }
+
+    function handleAnswer(btn) {
+        if (quizState.answered) return;
+        quizState.answered = true;
+
+        const selectedIdx = parseInt(btn.dataset.index, 10);
+        const correctIdx = QUIZ_QUESTIONS[quizState.current].correct;
+        const explanation = QUIZ_QUESTIONS[quizState.current].explanation;
+        const feedbackEl = $('#quiz-feedback');
+        const allOptions = $$('#quiz-options .quiz-option');
+
+        // Disable all options
+        allOptions.forEach(o => {
+            o.disabled = true;
+            o.setAttribute('aria-checked', 'false');
+        });
+
+        btn.setAttribute('aria-checked', 'true');
+
+        if (selectedIdx === correctIdx) {
+            btn.classList.add('correct');
+            quizState.score++;
+            if (feedbackEl) {
+                feedbackEl.innerHTML = `<strong style="color:var(--green);">✓ Correcto</strong><br><span style="color:var(--muted);">${explanation}</span>`;
+                feedbackEl.style.display = 'block';
+            }
+        } else {
+            btn.classList.add('incorrect');
+            allOptions[correctIdx]?.classList.add('correct');
+            if (feedbackEl) {
+                feedbackEl.innerHTML = `<strong style="color:var(--red);">✗ Incorrecto</strong><br><span style="color:var(--muted);">${explanation}</span>`;
+                feedbackEl.style.display = 'block';
+            }
+        }
+    }
+
+    function showResults() {
+        const container = $('#quiz-container');
+        const results = $('#quiz-results');
+        const scoreDisplay = $('#score-display');
+        const scoreMessage = $('#score-message');
+
+        if (container) container.style.display = 'none';
+        if (results) results.style.display = 'block';
+        if (scoreDisplay) scoreDisplay.textContent = `${quizState.score}/${QUIZ_QUESTIONS.length}`;
+
+        const pct = (quizState.score / QUIZ_QUESTIONS.length) * 100;
+        const message =
+            pct === 100 ? '¡Excelente! ¡Dominas la soldadura!' :
+            pct >= 80  ? '¡Muy bien! Tienes sólidos conocimientos.' :
+            pct >= 60  ? 'Aprobado. Sigue practicando.' :
+                         'Repasa los conceptos y vuelve a intentarlo.';
+        if (scoreMessage) scoreMessage.textContent = message;
+    }
+
+    function resetQuiz() {
+        quizState = { current: 0, score: 0, answered: false };
+        const container = $('#quiz-container');
+        const results = $('#quiz-results');
+        if (container) container.style.display = 'block';
+        if (results) results.style.display = 'none';
+        renderQuestion();
+    }
+
+    // ===== TABS =====
+    function initTabs() {
+        const buttons = $$('[role="tab"]');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                buttons.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+                btn.classList.add('active');
+                btn.setAttribute('aria-selected', 'true');
+                currentTab = btn.dataset.tab;
+                renderComparisonTable(currentTab);
+            });
+        });
+    }
+
+    // ===== SCROLL REVEAL =====
+    function initScrollReveal() {
+        const observer = new IntersectionObserver(
+            (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+            { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+        );
+        $$('.reveal').forEach(el => observer.observe(el));
+    }
+
+    // ===== MOBILE NAV =====
+    function initMobileNav() {
+        const btn = $('#mobile-menu-btn');
+        const links = $('#nav-links');
+        if (!btn || !links) return;
+
+        btn.addEventListener('click', () => {
+            const open = links.classList.toggle('open');
+            btn.setAttribute('aria-expanded', String(open));
+        });
+
+        links.querySelectorAll('a').forEach(a => {
+            a.addEventListener('click', () => {
+                links.classList.remove('open');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+
+    // ===== SPARK CANVAS =====
+    function initSparkCanvas() {
+        const canvas = $('#sparks-canvas');
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReducedMotion) return;
+
+        /** @type {Array<{x:number,y:number,vx:number,vy:number,size:number,life:number,decay:number,r:number,g:number,b:number}>} */
+        let sparks = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function createSpark() {
+            const isOrange = Math.random() > 0.45;
+            return {
+                x: Math.random() * canvas.width,
+                y: canvas.height + 10,
+                vx: (Math.random() - 0.5) * 2.2,
+                vy: -(Math.random() * 3.5 + 0.8),
+                size: Math.random() * 2.5 + 0.5,
+                life: 1,
+                decay: Math.random() * 0.018 + 0.004,
+                r: isOrange ? 255 : 255,
+                g: isOrange ? 107 : 204,
+                b: isOrange ? 44 : 0,
+            };
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (Math.random() > 0.90 && sparks.length < 60) {
+                sparks.push(createSpark());
+            }
+
+            sparks = sparks.filter(s => {
+                s.x += s.vx;
+                s.y += s.vy;
+                s.vy += 0.025; // gravity
+                s.life -= s.decay;
+                if (s.life <= 0) return false;
+
+                const alpha = Math.max(0, Math.min(1, s.life));
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, Math.max(0.3, s.size), 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${s.r},${s.g},${s.b},${alpha})`;
+                ctx.fill();
+                return true;
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        resize();
+        window.addEventListener('resize', resize, { passive: true });
+        animate();
+    }
+
+    // ===== QUIZ NAVIGATION =====
+    function initQuizNavigation() {
+        $('#quiz-prev')?.addEventListener('click', () => {
+            if (quizState.current > 0) {
+                quizState.current--;
+                renderQuestion();
+            }
+        });
+
+        $('#quiz-next')?.addEventListener('click', () => {
+            if (quizState.current < QUIZ_QUESTIONS.length - 1) {
+                quizState.current++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        });
+
+        $('#quiz-restart')?.addEventListener('click', resetQuiz);
+    }
+
+    // ===== BOOT =====
+    document.addEventListener('DOMContentLoaded', () => {
+        initSparkCanvas();
+        renderWeldingTypes();
+        renderComparisonTable(currentTab);
+        renderSafetyItems();
+        renderQuestion();
+        initScrollReveal();
+        initTabs();
+        initQuizNavigation();
+        initMobileNav();
+    });
+    </script>
+</body>
+</html>
