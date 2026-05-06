@@ -30,7 +30,7 @@ const courses = [
         uses: 'Aeroespacial, tuberías de presión, arte.',
         difficulty: 'advanced',
         price: 280000,
-        image: 'assets/media__1777843619071.png'
+        image: 'assets/tig_welding_course_1777843673673.png'
     },
     {
         id: 'electrodo',
@@ -50,7 +50,7 @@ const courses = [
         uses: 'Chapas metálicas, electrodomésticos.',
         difficulty: 'beginner',
         price: 110000,
-        image: 'assets/media__1777843603288.png'
+        image: 'assets/spot_welding_course_1777843702052.png'
     },
     {
         id: 'oxiacetilenica',
